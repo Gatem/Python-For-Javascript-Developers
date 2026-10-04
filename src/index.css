@@ -1,0 +1,73 @@
+@import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Outfit:wght@300;400;500;600;700&display=swap");
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Outfit", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+
+  --color-brand-green: #10b981;
+  --color-brand-green-dark: #059669;
+  --color-brand-green-light: #6ee7b7;
+  --color-brand-blue: #3b82f6;
+  --color-brand-blue-light: #60a5fa;
+
+  --color-term-success: #4ade80;
+  --color-term-warning: #fbbf24;
+  --color-term-error: #f87171;
+  --color-term-muted: #94a3b8;
+
+  --color-surface-base: #0a0e1a;
+  --color-surface-card: #111827;
+
+  --color-txt-primary: #e2e8f0;
+  --color-txt-secondary: #cbd5e1;
+  --color-txt-muted: #94a3b8;
+  /* Both meet WCAG AA (4.5:1) on the dark surfaces. */
+  --color-txt-dim: #8593a8;
+  --color-txt-dimmer: #7c8aa0;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--color-surface-base);
+  color-scheme: dark;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-brand-blue-light);
+  outline-offset: 2px;
+}
+
+.code-editor-textarea:focus-visible,
+#lesson-main:focus-visible {
+  outline: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+
+.code-editor-textarea::selection {
+  background: rgba(59, 130, 246, 0.35);
+  color: transparent;
+}
+
+.code-editor-textarea::placeholder {
+  color: var(--color-txt-dimmer);
+}

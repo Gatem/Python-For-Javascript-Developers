@@ -1,0 +1,22 @@
+name: Verify exercises
+
+# Runs every reference answer and hidden test in real Python (Pyodide).
+# Slower than the unit tests, so it only runs when course content changes.
+on:
+  pull_request:
+    paths: ["src/data/**", "src/lib/**"]
+  push:
+    branches: [main]
+    paths: ["src/data/**", "src/lib/**"]
+
+jobs:
+  exercises:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run test:exercises
