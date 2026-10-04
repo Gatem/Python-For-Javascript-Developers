@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { Quote } from "lucide-react";
 
 export default function QuotePopover({ onQuote }) {
   const [pos, setPos] = useState(null);
@@ -75,14 +76,12 @@ export default function QuotePopover({ onQuote }) {
           window.getSelection()?.removeAllRanges();
           setPos(null);
         }}
-        className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-brand-blue text-white text-[12px] font-semibold cursor-pointer border-none shadow-lg hover:bg-brand-blue-light transition-colors"
+        className="flex items-center gap-1.5 rounded-xl bg-text px-3.5 py-2 text-[12.5px] font-semibold text-bg shadow-card cursor-pointer hover:opacity-90"
       >
-        <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M6 17h3l2-4V7H5v6h3zm8 0h3l2-4V7h-6v6h3z" />
-        </svg>
-        Quote
+        <Quote aria-hidden="true" size={14} />
+        Quote in notes
       </button>
-      <div aria-hidden="true" className="w-2.5 h-2.5 bg-brand-blue rotate-45 mx-auto -mt-1.5" />
+      <div aria-hidden="true" className="mx-auto -mt-1.5 size-2.5 rotate-45 bg-text" />
     </div>
   );
 }

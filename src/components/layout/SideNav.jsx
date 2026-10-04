@@ -1,21 +1,14 @@
+import { CircleCheck, Circle, RotateCcw } from "lucide-react";
 import { TIERS } from "../../data";
-import ProgressBar from "../ui/ProgressBar";
-
-const TIER_STYLES = {
-  emerald: "from-emerald-500/20 to-emerald-500/5 border-emerald-500/25 text-emerald-400",
-  blue:    "from-blue-500/20 to-blue-500/5 border-blue-500/25 text-blue-400",
-  violet:  "from-violet-500/20 to-violet-500/5 border-violet-500/25 text-violet-400",
-  amber:   "from-amber-500/20 to-amber-500/5 border-amber-500/25 text-amber-400",
-};
+import ProgressRing from "../ui/ProgressRing";
+import { ModuleIcon, TierIcon } from "../ui/moduleIcons";
+import AuthorCard from "./AuthorCard";
 
 function buildTierGroups(modules) {
   const byTier = {};
   modules.forEach((m) => {
     const tier = m.tier || 1;
-    if (!byTier[tier]) {
-      const info = TIERS[tier] || { label: `Tier ${tier}`, icon: "", color: "emerald" };
-      byTier[tier] = { tier, ...info, modules: [] };
-    }
+    if (!byTier[tier]) byTier[tier] = { tier, ...(TIERS[tier] || { label: `Tier ${tier}` }), modules: [] };
     byTier[tier].modules.push(m);
   });
   return Object.keys(byTier).sort((a, b) => a - b).map((k) => byTier[k]);
@@ -23,132 +16,135 @@ function buildTierGroups(modules) {
 
 const keyOf = (m, l) => `${m.id}/${l.id}`;
 
-export default function SideNav({
-  modules,
-  current,
-  done,
-  completedCount,
-  totalLessons,
-  onSelect,
-  onReset,
-}) {
-  const tierGroups = buildTierGroups(modules);
+export default function SideNav({ modules, current, done, completedCount, totalLessons, onSelect, onReset }) {
   const currentModId = current.split("/")[0];
+  const pct = totalLessons ? completedCount / totalLessons : 0;
 
   return (
-    <nav aria-label="Course lessons">
-      <ProgressBar completed={completedCount} total={totalLessons} />
-      {tierGroups.map((group) => (
-        <section key={group.tier} aria-labelledby={`tier-${group.tier}`}>
-          <div className="mx-3 mt-4 mb-2">
+    <nav aria-label="Course lessons" className="flex min-h-full flex-col gap-5 p-4">
+      <div className="flex items-center gap-3 rounded-2xl border border-fg/8 bg-surface p-3.5 shadow-card">
+        <ProgressRing value={pct} size={46} stroke={4}>
+          <span className="text-[11px] font-semibold text-text">{Math.round(pct * 100)}%</span>
+        </ProgressRing>
+        <div className="min-w-0">
+          <div className="text-[13.5px] font-semibold text-text">Your progress</div>
+          <div className="text-[12.5px] text-muted">
+            {completedCount} of {totalLessons} lessons
+          </div>
+        </div>
+      </div>
+
+      {buildTierGroups(modules).map((group) => {
+        return (
+          <section key={group.tier} aria-labelledby={`tier-${group.tier}`}>
             <h2
               id={`tier-${group.tier}`}
-              className={`m-0 flex items-center gap-2 px-3 py-1.5 rounded-lg border bg-linear-to-r ${TIER_STYLES[group.color] || TIER_STYLES.emerald}`}
+              className="m-0 mb-1.5 flex items-center gap-1.5 px-2 text-[11.5px] font-semibold uppercase tracking-[0.08em] text-muted"
             >
-              <span className="text-[13px]" aria-hidden="true">{group.icon}</span>
-              <span className="text-[12px] font-bold uppercase tracking-[0.08em]">
-                {group.label}
-              </span>
+              <TierIcon tier={group.tier} aria-hidden="true" size={13} />
+              {group.label}
             </h2>
-          </div>
-          <ul className="list-none m-0 p-0">
-            {group.modules.map((m) => {
-              const doneCount = m.lessons.filter((l) => done[keyOf(m, l)]).length;
-              const total = m.lessons.length;
-              const isCurrentMod = m.id === currentModId;
-              return (
-                <li key={m.id}>
-                  <button
-                    type="button"
-                    onClick={() => onSelect(keyOf(m, m.lessons[0]))}
-                    aria-expanded={isCurrentMod}
-                    className={`w-full text-left bg-transparent border-0 border-l-[3px] font-sans text-txt-primary py-2.5 px-4 cursor-pointer ${
-                      isCurrentMod
-                        ? "border-l-brand-green bg-emerald-500/[0.08]"
-                        : "border-l-transparent hover:bg-white/[0.03]"
-                    }`}
-                  >
-                    <span className="flex items-center justify-between gap-2">
-                      <span className="font-semibold text-[14px]">
-                        <span aria-hidden="true">{m.icon} </span>
-                        {m.title}
+            <ul className="m-0 list-none space-y-0.5 p-0">
+              {group.modules.map((m) => {
+                const doneCount = m.lessons.filter((l) => done[keyOf(m, l)]).length;
+                const total = m.lessons.length;
+                const isCurrentMod = m.id === currentModId;
+                const complete = doneCount === total;
+                return (
+                  <li key={m.id}>
+                    <button
+                      type="button"
+                      onClick={() => onSelect(keyOf(m, m.lessons[0]))}
+                      aria-expanded={isCurrentMod}
+                      className={`group flex w-full items-center gap-3 rounded-xl px-2 py-2 text-left cursor-pointer transition-colors ${
+                        isCurrentMod ? "bg-accent/10" : "hover:bg-fg/5"
+                      }`}
+                    >
+                      <span
+                        aria-hidden="true"
+                        className={`flex size-8 shrink-0 items-center justify-center rounded-lg border transition-colors ${
+                          isCurrentMod
+                            ? "border-accent/30 bg-accent/15 text-accent-text"
+                            : "border-fg/8 bg-surface text-text-2 group-hover:text-text"
+                        }`}
+                      >
+                        <ModuleIcon id={m.id} size={16} strokeWidth={2} />
                       </span>
-                      {doneCount === total ? (
-                        <span className="shrink-0 flex items-center justify-center w-[18px] h-[18px] rounded-full bg-emerald-500/20 text-[11px]" title="Module complete">
-                          <span aria-hidden="true">{"✓"}</span>
-                          <span className="sr-only">, complete</span>
+                      <span className="min-w-0 flex-1">
+                        <span className={`block truncate text-[14px] font-medium ${isCurrentMod ? "text-text" : "text-text-2"}`}>
+                          {m.title}
                         </span>
+                        <span className="block truncate text-[12px] text-muted">{m.subtitle}</span>
+                      </span>
+                      {complete ? (
+                        <CircleCheck size={17} className="shrink-0 text-accent" aria-label="complete" />
                       ) : doneCount > 0 ? (
-                        <span className="shrink-0 text-[11px] font-medium text-txt-dim bg-white/[0.06] rounded-full px-1.5 py-0.5">
-                          <span className="sr-only">, </span>
+                        <span className="shrink-0 rounded-full bg-fg/6 px-1.5 py-0.5 text-[11px] font-medium text-text-2">
                           {doneCount}/{total}
                           <span className="sr-only"> lessons done</span>
                         </span>
                       ) : null}
-                    </span>
-                    <span className="block text-[12px] text-txt-dim mt-[1px]">
-                      {m.subtitle}
-                    </span>
-                    {doneCount > 0 && doneCount < total && (
-                      <span className="block mt-1.5 h-[3px] rounded-full bg-white/[0.06] overflow-hidden" aria-hidden="true">
-                        <span
-                          className="block h-full rounded-full bg-brand-blue-light transition-all duration-500"
-                          style={{ width: `${(doneCount / total) * 100}%` }}
-                        />
-                      </span>
+                    </button>
+
+                    {isCurrentMod && (
+                      <ul className="relative m-0 mb-1 ml-[1.55rem] list-none border-l border-fg/10 p-0 py-1">
+                        {m.lessons.map((l) => {
+                          const key = keyOf(m, l);
+                          const isCurrent = key === current;
+                          const isDone = !!done[key];
+                          return (
+                            <li key={l.id}>
+                              <a
+                                href={`#/${key}`}
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  onSelect(key);
+                                }}
+                                aria-current={isCurrent ? "page" : undefined}
+                                className={`relative -ml-px flex items-center gap-2.5 border-l-2 py-1.5 pl-4 pr-2 text-[13.5px] no-underline transition-colors ${
+                                  isCurrent
+                                    ? "border-accent font-medium text-text"
+                                    : "border-transparent text-muted hover:border-fg/25 hover:text-text"
+                                }`}
+                              >
+                                {isDone ? (
+                                  <CircleCheck size={15} className="shrink-0 text-accent" aria-hidden="true" />
+                                ) : (
+                                  <Circle
+                                    size={15}
+                                    className={`shrink-0 ${isCurrent ? "text-accent" : "text-fg/25"}`}
+                                    aria-hidden="true"
+                                  />
+                                )}
+                                <span className="truncate">{l.title}</span>
+                                {isDone && <span className="sr-only">(completed)</span>}
+                              </a>
+                            </li>
+                          );
+                        })}
+                      </ul>
                     )}
-                  </button>
-                  {isCurrentMod && (
-                    <ul className="list-none m-0 p-0">
-                      {m.lessons.map((l) => {
-                        const key = keyOf(m, l);
-                        const isCurrent = key === current;
-                        const isDone = !!done[key];
-                        return (
-                          <li key={l.id}>
-                            <a
-                              href={`#/${key}`}
-                              onClick={(e) => {
-                                e.preventDefault();
-                                onSelect(key);
-                              }}
-                              aria-current={isCurrent ? "page" : undefined}
-                              className={`py-1.5 pl-8 pr-4 text-[13.5px] flex items-center gap-2 no-underline ${
-                                isCurrent
-                                  ? "text-brand-green bg-emerald-500/[0.06]"
-                                  : isDone
-                                    ? "text-brand-green-light hover:bg-white/[0.03]"
-                                    : "text-txt-muted hover:text-txt-secondary hover:bg-white/[0.03]"
-                              }`}
-                            >
-                              <span className="text-[11px]" aria-hidden="true">
-                                {isDone ? "✅" : isCurrent ? "▸" : "○"}
-                              </span>
-                              <span>{l.title}</span>
-                              {isDone && <span className="sr-only">(completed)</span>}
-                            </a>
-                          </li>
-                        );
-                      })}
-                    </ul>
-                  )}
-                </li>
-              );
-            })}
-          </ul>
-        </section>
-      ))}
-      {completedCount > 0 && (
-        <div className="px-4 pt-3 mt-2 border-t border-white/5">
+                  </li>
+                );
+              })}
+            </ul>
+          </section>
+        );
+      })}
+
+      <div className="mt-auto space-y-3 pt-2">
+        <AuthorCard />
+        {completedCount > 0 && (
           <button
             type="button"
             onClick={onReset}
-            className="bg-transparent border border-red-500/30 text-red-400 text-[12px] py-[5px] px-3 rounded-md cursor-pointer w-full font-sans hover:bg-red-500/10"
+            className="flex w-full items-center justify-center gap-1.5 rounded-xl py-2 text-[12.5px] text-muted hover:bg-danger/8 hover:text-danger cursor-pointer transition-colors"
           >
-            Reset Progress
+            <RotateCcw size={13} aria-hidden="true" />
+            Reset progress
           </button>
-        </div>
-      )}
+        )}
+      </div>
     </nav>
   );
 }

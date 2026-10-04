@@ -1,24 +1,33 @@
-const variants = {
+const VARIANTS = {
   primary:
-    "bg-linear-to-r from-brand-green to-brand-green-dark text-white border border-transparent",
-  run: "bg-violet-500/15 text-violet-300 border border-violet-500/30",
-  hint: "bg-amber-500/12 text-amber-400 border border-amber-500/25",
-  secondary: "bg-blue-500/12 text-blue-300 border border-blue-500/25",
+    "bg-accent text-accent-fg hover:bg-accent-strong dark:hover:bg-accent-text shadow-sm",
+  secondary:
+    "bg-surface text-text border border-fg/12 hover:bg-surface-2 hover:border-fg/20",
+  ghost: "text-text-2 hover:bg-fg/6 hover:text-text",
+  soft: "bg-accent/10 text-accent-text hover:bg-accent/15",
+};
+
+const SIZES = {
+  sm: "h-8 px-3 text-[13px] gap-1.5 rounded-lg",
+  md: "h-10 px-4 text-[14px] gap-2 rounded-xl",
 };
 
 export default function Button({
   variant = "secondary",
+  size = "md",
   className = "",
   type = "button",
+  icon: Icon,
   children,
   ...props
 }) {
   return (
     <button
       type={type}
-      className={`px-[18px] py-2 rounded-lg cursor-pointer text-[14px] font-semibold font-sans disabled:opacity-40 disabled:cursor-not-allowed ${variants[variant] || variants.secondary} ${className}`}
+      className={`inline-flex items-center justify-center font-medium whitespace-nowrap cursor-pointer transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${VARIANTS[variant]} ${SIZES[size]} ${className}`}
       {...props}
     >
+      {Icon && <Icon aria-hidden="true" size={size === "sm" ? 15 : 16} strokeWidth={2.2} />}
       {children}
     </button>
   );

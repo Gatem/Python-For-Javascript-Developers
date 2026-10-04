@@ -1,4 +1,5 @@
 import { useRef, useEffect } from "react";
+import { NotebookPen, Plus, X, Check } from "lucide-react";
 import NoteEntry from "./NoteEntry";
 
 export default function NotesPanel({
@@ -39,25 +40,15 @@ export default function NotesPanel({
         type="button"
         onClick={onToggle}
         aria-label={totalNoteCount ? `Open notes (${totalNoteCount} saved)` : "Open notes"}
-        className="fixed right-4 bottom-4 z-40 w-12 h-12 rounded-full bg-blue-500/15 border border-blue-500/25 text-brand-blue-light cursor-pointer flex items-center justify-center shadow-lg hover:bg-blue-500/25 transition-colors"
-        title="Open notes"
+        title="Notes"
+        className="fixed bottom-5 right-5 z-30 flex size-13 items-center justify-center rounded-2xl bg-text text-bg shadow-[0_10px_30px_-8px_rgba(0,0,0,0.45)] transition-transform hover:-translate-y-0.5 cursor-pointer"
       >
-        <svg
-          aria-hidden="true"
-          width="20"
-          height="20"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <path d="M12 20h9" />
-          <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
-        </svg>
+        <NotebookPen aria-hidden="true" size={21} />
         {totalNoteCount > 0 && (
-          <span aria-hidden="true" className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-brand-blue text-white text-[10px] flex items-center justify-center font-semibold">
+          <span
+            aria-hidden="true"
+            className="absolute -right-1.5 -top-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-info px-1 text-[11px] font-semibold text-white ring-2 ring-bg"
+          >
             {totalNoteCount > 9 ? "9+" : totalNoteCount}
           </span>
         )}
@@ -67,89 +58,57 @@ export default function NotesPanel({
 
   const panelContent = (
     <>
-      <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.06] shrink-0">
-        <div className="flex items-center gap-2">
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="text-brand-blue-light"
-          >
-            <path d="M12 20h9" />
-            <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
-          </svg>
-          <h2 id="notes-heading" className="m-0 text-[14px] font-semibold text-txt-secondary">
-            Notes
-          </h2>
-          {entries.length > 0 && (
-            <span className="text-[11px] text-txt-dimmer">
-              ({entries.length})
-            </span>
-          )}
-        </div>
-        <div className="flex items-center gap-3">
-          <span
-            role="status"
-            className={`text-[12px] transition-opacity duration-300 ${saved ? "text-term-success/50" : "text-term-warning/50"}`}
-          >
-            {saved ? "Saved" : "Saving..."}
+      <div className="flex items-center justify-between gap-2 border-b border-fg/8 px-4 py-3">
+        <div className="flex min-w-0 items-center gap-2.5">
+          <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-info/12 text-info">
+            <NotebookPen aria-hidden="true" size={16} />
           </span>
+          <div className="min-w-0">
+            <h2 id="notes-heading" className="m-0 text-[14.5px] font-semibold text-text">
+              Notes {entries.length > 0 && <span className="font-normal text-muted">({entries.length})</span>}
+            </h2>
+            <div className="truncate text-[12px] text-muted">{lessonTitle}</div>
+          </div>
+        </div>
+        <div className="flex shrink-0 items-center gap-1">
+          <span role="status" className="mr-1 flex items-center gap-1 text-[11.5px] text-muted">
+            {saved ? (
+              <>
+                <Check aria-hidden="true" size={12} className="text-success" /> Saved
+              </>
+            ) : (
+              "Saving…"
+            )}
+          </span>
+          <button
+            type="button"
+            onClick={onAddNote}
+            aria-label="Add a note"
+            title="Add a note"
+            className="inline-flex size-8 items-center justify-center rounded-lg bg-info/12 text-info hover:bg-info/20 cursor-pointer"
+          >
+            <Plus aria-hidden="true" size={17} />
+          </button>
           <button
             type="button"
             onClick={onToggle}
             aria-label="Close notes"
-            className="w-8 h-8 rounded-md bg-white/5 border border-white/10 text-txt-muted cursor-pointer flex items-center justify-center text-[13px] hover:bg-white/10 transition-colors"
+            className="inline-flex size-8 items-center justify-center rounded-lg text-muted hover:bg-fg/8 hover:text-text cursor-pointer"
           >
-            <span aria-hidden="true">✕</span>
+            <X aria-hidden="true" size={17} />
           </button>
         </div>
       </div>
 
-      <div className="flex items-center justify-between px-4 py-2 border-b border-white/[0.04] shrink-0">
-        <div className="text-[12px] text-txt-dim truncate mr-2">
-          {lessonTitle}
-        </div>
-        <button
-          type="button"
-          onClick={onAddNote}
-          className="text-[12px] text-brand-blue-light bg-brand-blue/10 px-2.5 py-1 rounded-md cursor-pointer border border-brand-blue/20 hover:bg-brand-blue/20 transition-colors shrink-0 font-sans"
-        >
-          + Add
-        </button>
-      </div>
-
-      <div
-        ref={listRef}
-        className="flex-1 min-h-0 overflow-y-auto custom-scrollbar"
-      >
+      <div ref={listRef} className="min-h-0 flex-1 space-y-3 overflow-y-auto scroll-thin p-4">
         {entries.length === 0 ? (
-          <div className="px-4 py-8 text-center">
-            <div className="text-[28px] mb-2 opacity-30">
-              <svg
-                width="32"
-                height="32"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="mx-auto text-txt-dim"
-              >
-                <path d="M12 20h9" />
-                <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
-              </svg>
-            </div>
-            <p className="text-[13px] text-txt-dim m-0 mb-1">No notes yet</p>
-            <p className="text-[12px] text-txt-dimmer m-0 leading-relaxed">
-              Click &ldquo;+ Add&rdquo; to write a note, or
-              <br />
-              select text from the lesson to quote it.
+          <div className="flex flex-col items-center px-4 py-12 text-center">
+            <span className="mb-3 flex size-12 items-center justify-center rounded-2xl bg-fg/5 text-muted">
+              <NotebookPen aria-hidden="true" size={22} />
+            </span>
+            <p className="m-0 mb-1 text-[14px] font-medium text-text">No notes yet</p>
+            <p className="m-0 max-w-[220px] text-[12.5px] leading-relaxed text-muted">
+              Use the + button to write a note, or select text in the lesson to quote it.
             </p>
           </div>
         ) : (
@@ -172,7 +131,10 @@ export default function NotesPanel({
 
   if (isWide) {
     return (
-      <aside aria-labelledby="notes-heading" className="w-1/3 min-w-[320px] shrink-0 bg-[rgba(15,23,42,0.6)] border-l border-white/5 flex flex-col sticky top-0 h-screen self-start">
+      <aside
+        aria-labelledby="notes-heading"
+        className="sticky top-16 flex h-[calc(100dvh-4rem)] w-[340px] shrink-0 flex-col self-start border-l border-fg/8 bg-surface-2/40"
+      >
         {panelContent}
       </aside>
     );
@@ -180,10 +142,11 @@ export default function NotesPanel({
 
   return (
     <>
-      <div aria-hidden="true" className="fixed inset-0 bg-black/40 z-40" onClick={onToggle} />
+      <div aria-hidden="true" className="fixed inset-0 z-40 bg-black/40 backdrop-blur-[2px]" onClick={onToggle} />
       <aside
         aria-labelledby="notes-heading"
-        className="fixed right-0 top-0 h-full w-[360px] max-w-[90vw] z-50 bg-[rgba(15,23,42,0.97)] border-l border-white/5 flex flex-col shadow-2xl">
+        className="fixed bottom-0 right-0 top-0 z-50 flex w-[380px] max-w-[92vw] flex-col border-l border-fg/10 bg-bg shadow-card"
+      >
         {panelContent}
       </aside>
     </>

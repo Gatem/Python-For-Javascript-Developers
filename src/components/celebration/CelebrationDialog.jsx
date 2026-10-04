@@ -1,4 +1,7 @@
 import { useEffect, useRef } from "react";
+import { Trophy, Star, CircleCheck, Flame, Target, ArrowRight } from "lucide-react";
+import ProgressRing from "../ui/ProgressRing";
+import { ModuleIcon } from "../ui/moduleIcons";
 
 function Confetti({ level }) {
   const canvasRef = useRef(null);
@@ -67,38 +70,6 @@ function Confetti({ level }) {
   );
 }
 
-function ProgressRing({ completed, total }) {
-  const pct = total > 0 ? completed / total : 0;
-  const r = 38;
-  const circ = 2 * Math.PI * r;
-  const offset = circ * (1 - pct);
-
-  return (
-    <div className="relative flex items-center justify-center my-3">
-      <svg width="92" height="92" className="-rotate-90">
-        <circle
-          cx="46" cy="46" r={r}
-          fill="none" stroke="currentColor" strokeWidth="5"
-          className="text-white/[0.06]"
-        />
-        <circle
-          cx="46" cy="46" r={r}
-          fill="none" stroke="currentColor" strokeWidth="5"
-          strokeDasharray={circ} strokeDashoffset={offset}
-          strokeLinecap="round"
-          className="text-brand-green transition-all duration-1000 ease-out"
-        />
-      </svg>
-      <div className="absolute text-center">
-        <div className="text-[18px] font-bold text-txt-primary">
-          {Math.round(pct * 100)}%
-        </div>
-        <div className="text-[10px] text-txt-dim">complete</div>
-      </div>
-    </div>
-  );
-}
-
 export default function CelebrationDialog({
   celebration,
   activity,
@@ -143,7 +114,6 @@ export default function CelebrationDialog({
     level,
     lessonTitle,
     moduleTitle,
-    moduleIcon,
     nextModule,
     totalCompleted,
     totalLessons,
@@ -151,130 +121,97 @@ export default function CelebrationDialog({
 
   const handleAction = () => {
     onDismiss();
-    if ((level === "module" || level === "lesson") && onNext) onNext();
+    if (level !== "course" && onNext) onNext();
   };
 
-  const heading =
-    level === "course"
-      ? "Course Complete!"
-      : level === "module"
-        ? "Module Complete!"
-        : "Lesson Complete!";
-
-  const icon =
-    level === "course"
-      ? "\u{1F3C6}"
-      : level === "module"
-        ? "\u{1F31F}"
-        : "\u{2705}";
+  const heading = level === "course" ? "Course complete!" : level === "module" ? "Module complete!" : "Lesson complete!";
+  const HeroIcon = level === "course" ? Trophy : level === "module" ? Star : CircleCheck;
+  const pct = totalLessons ? totalCompleted / totalLessons : 0;
 
   return (
     // Backdrop click is a mouse shortcut; keyboard users have Escape and the buttons.
     // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
     <div
-      className="fixed inset-0 z-[100] flex items-center justify-center p-4 transition-all duration-300 bg-black/60 backdrop-blur-sm starting:bg-black/0 starting:backdrop-blur-none"
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm transition-all duration-300 starting:bg-black/0 starting:backdrop-blur-none"
       onClick={(e) => e.target === e.currentTarget && onDismiss()}
     >
       <Confetti level={level} />
-
       <div
         data-celebration
         role="dialog"
         aria-modal="true"
         aria-labelledby="celebration-title"
-        className={`relative bg-surface-card border border-white/[0.08] rounded-2xl p-7 max-w-[380px] w-full shadow-[0_24px_80px_rgba(0,0,0,0.5)] text-center transition-all duration-500 opacity-100 scale-100 translate-y-0 starting:opacity-0 starting:scale-90 starting:translate-y-6`}
+        className="relative w-full max-w-[400px] overflow-hidden rounded-3xl border border-fg/10 bg-surface p-7 text-center shadow-[0_30px_80px_-20px_rgba(0,0,0,0.5)] transition-all duration-500 starting:translate-y-6 starting:scale-95 starting:opacity-0"
       >
-        <div aria-hidden="true" className={`text-[48px] mb-1 ${level !== "lesson" ? "motion-safe:animate-bounce" : ""}`}>
-          {icon}
-        </div>
-
-        <h2 id="celebration-title" className="text-[22px] font-bold m-0 mb-1 bg-linear-to-r from-brand-green to-brand-blue bg-clip-text text-transparent">
-          {heading}
-        </h2>
-
-        {level === "lesson" && (
-          <p className="text-[14px] text-txt-muted m-0">
-            {moduleIcon} {lessonTitle}
+        <div aria-hidden="true" className="absolute inset-x-0 top-0 h-28 bg-linear-to-b from-accent/15 to-transparent" />
+        <div className="relative">
+          <span
+            aria-hidden="true"
+            className={`mx-auto mb-4 flex size-16 items-center justify-center rounded-2xl ${
+              level === "course" ? "bg-amber-400/20 text-amber-500" : "bg-accent/15 text-accent"
+            } ${level !== "lesson" ? "motion-safe:animate-bounce" : ""}`}
+          >
+            <HeroIcon size={32} strokeWidth={2} />
+          </span>
+          <h2 id="celebration-title" className="m-0 text-[24px] font-semibold tracking-tight text-text">
+            {heading}
+          </h2>
+          <p className="m-0 mt-1.5 text-[14.5px] text-text-2">
+            {level === "lesson" && lessonTitle}
+            {level === "module" && moduleTitle}
+            {level === "course" && `You finished all ${totalLessons} lessons. You speak Python now.`}
           </p>
-        )}
 
-        {level === "module" && (
-          <p className="text-[15px] text-txt-secondary m-0 font-medium">
-            {moduleIcon} {moduleTitle}
-          </p>
-        )}
-
-        {level === "course" && (
-          <p className="text-[14px] text-txt-muted m-0 mt-1">
-            You&apos;ve mastered all {totalLessons} lessons!
-          </p>
-        )}
-
-        <ProgressRing completed={totalCompleted} total={totalLessons} />
-
-        <div className="text-[13px] text-txt-dim mb-4">
-          {totalCompleted} of {totalLessons} lessons
-        </div>
-
-        {activity && (
-          <div className="flex items-center justify-center gap-4 mb-5 text-[12px]">
-            {activity.streak > 0 && (
-              <div className="flex items-center gap-1 bg-amber-500/10 border border-amber-500/20 rounded-full px-3 py-1">
-                <span>{"\u{1F525}"}</span>
-                <span className="text-amber-400 font-medium">
-                  {activity.streak} day streak
-                </span>
+          <div className="my-6 flex items-center justify-center gap-4">
+            <ProgressRing value={pct} size={72} stroke={6}>
+              <span className="text-[15px] font-semibold text-text">{Math.round(pct * 100)}%</span>
+            </ProgressRing>
+            <div className="text-left text-[13px] text-text-2">
+              <div>
+                <span className="font-semibold text-text">{totalCompleted}</span> of {totalLessons} lessons
               </div>
-            )}
-            <div
-              className={`flex items-center gap-1 rounded-full px-3 py-1 ${
-                activity.todayDone >= activity.dailyTarget
-                  ? "bg-emerald-500/10 border border-emerald-500/20"
-                  : "bg-blue-500/10 border border-blue-500/20"
-              }`}
-            >
-              <span>
-                {activity.todayDone >= activity.dailyTarget
-                  ? "\u{2705}"
-                  : "\u{1F4CA}"}
-              </span>
-              <span
-                className={`font-medium ${
-                  activity.todayDone >= activity.dailyTarget
-                    ? "text-emerald-400"
-                    : "text-blue-400"
-                }`}
-              >
-                {activity.todayDone}/{activity.dailyTarget} today
-              </span>
+              {activity && (
+                <>
+                  {activity.streak > 0 && (
+                    <div className="mt-1 flex items-center gap-1.5">
+                      <Flame aria-hidden="true" size={14} className="text-orange-500" />
+                      {activity.streak} day streak
+                    </div>
+                  )}
+                  <div className="mt-1 flex items-center gap-1.5">
+                    <Target aria-hidden="true" size={14} className="text-accent" />
+                    {activity.todayDone}/{activity.dailyTarget} today
+                  </div>
+                </>
+              )}
             </div>
           </div>
-        )}
 
-        {level === "module" && nextModule && (
-          <div className="text-[12px] text-txt-dimmer mb-4">
-            Next up: {nextModule.icon} {nextModule.title}
-          </div>
-        )}
+          {level === "module" && nextModule && (
+            <div className="mb-5 flex items-center justify-center gap-2 rounded-xl bg-fg/5 px-3 py-2 text-[13px] text-text-2">
+              Next up:
+              <ModuleIcon id={nextModule.id} aria-hidden="true" size={15} className="text-accent" />
+              <span className="font-medium text-text">{nextModule.title}</span>
+            </div>
+          )}
 
-        <button
-          ref={primaryRef}
-          type="button"
-          onClick={handleAction}
-          className="w-full py-2.5 rounded-xl bg-linear-to-r from-brand-green to-brand-green-dark text-white text-[14px] font-semibold border-none cursor-pointer shadow-[0_4px_16px_rgba(16,185,129,0.25)] hover:brightness-110 transition-all font-sans"
-        >
-          {level === "course"
-            ? "Celebrate! \u{1F389}"
-            : "Continue \u{2192}"}
-        </button>
-
-        <button
-          type="button"
-          onClick={onDismiss}
-          className="mt-2.5 bg-transparent border-none text-txt-dimmer text-[13px] cursor-pointer font-sans hover:text-txt-muted"
-        >
-          Dismiss
-        </button>
+          <button
+            ref={primaryRef}
+            type="button"
+            onClick={handleAction}
+            className="flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-accent text-[14.5px] font-semibold text-accent-fg hover:bg-accent-strong cursor-pointer transition-colors"
+          >
+            {level === "course" ? "Celebrate" : "Continue"}
+            {level !== "course" && <ArrowRight aria-hidden="true" size={16} />}
+          </button>
+          <button
+            type="button"
+            onClick={onDismiss}
+            className="mt-2 h-10 w-full rounded-xl text-[13.5px] text-muted hover:bg-fg/5 hover:text-text cursor-pointer"
+          >
+            Stay on this lesson
+          </button>
+        </div>
       </div>
     </div>
   );

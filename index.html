@@ -8,9 +8,22 @@
       name="description"
       content="Learn Python by mapping it to what you already know from JavaScript. Side-by-side examples, gotchas, and exercises that run real Python in your browser."
     />
-    <meta name="theme-color" content="#0a0e1a" />
+    <meta name="theme-color" content="#090c13" />
+    <meta name="author" content="Sabry E. Farrag" />
+    <script>
+      // Apply the saved or system theme before first paint (no flash).
+      (function () {
+        var t = null;
+        try { t = localStorage.getItem("py4js-theme"); } catch (e) {}
+        if (t !== "light" && t !== "dark") {
+          t = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+        }
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
     <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
     <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://gatem.github.io/Python-For-Javascript-Developers/" />
     <meta property="og:title" content="Python for JS Developers" />
     <meta
       property="og:description"

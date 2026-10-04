@@ -1,47 +1,54 @@
+import { ArrowLeftRight, ArrowRight } from "lucide-react";
+import SectionTitle from "./SectionTitle";
+import InlineText from "./InlineText";
+
+const chip = "inline-block rounded-md px-1.5 py-0.5 font-mono text-[12.5px] leading-snug break-words";
+
 export default function DiffTable({ diffs }) {
   if (!diffs || !diffs.length) return null;
   return (
-    <div className="mt-5 mb-1.5">
-      <h3 id="quick-ref-heading" className="text-[13px] font-semibold text-txt-muted mb-2 mt-0 uppercase tracking-wider">
-        Quick Reference
-      </h3>
-      <div className="rounded-lg overflow-x-auto border border-white/[0.06]">
-        <table aria-labelledby="quick-ref-heading" className="w-full border-collapse text-[14px]">
-          <thead>
-            <tr className="bg-white/[0.03]">
-              <th scope="col" className="p-2 px-2.5 text-left border-b-2 border-white/10 text-txt-muted font-semibold text-[12px] uppercase tracking-wider">
+    <section aria-labelledby="quick-ref-heading">
+      <SectionTitle id="quick-ref-heading" icon={ArrowLeftRight}>
+        Quick reference
+      </SectionTitle>
+      <div className="overflow-hidden rounded-2xl border border-fg/10 bg-surface shadow-card">
+        <table aria-labelledby="quick-ref-heading" className="w-full border-collapse text-[14px] max-sm:block">
+          <thead className="max-sm:hidden">
+            <tr className="bg-surface-2 text-left text-[12px] uppercase tracking-wider text-muted">
+              <th scope="col" className="w-[36%] px-4 py-2.5 font-semibold">
                 JavaScript
               </th>
-              <th scope="col" className="p-2 px-2.5 text-left border-b-2 border-white/10 text-txt-muted font-semibold text-[12px] uppercase tracking-wider">
+              <th scope="col" className="w-[36%] px-4 py-2.5 font-semibold">
                 Python
               </th>
-              <th scope="col" className="p-2 px-2.5 text-left border-b-2 border-white/10 text-txt-muted font-semibold text-[12px] uppercase tracking-wider">
+              <th scope="col" className="px-4 py-2.5 font-semibold">
                 Note
               </th>
             </tr>
           </thead>
-          <tbody>
+          <tbody className="max-sm:block">
             {diffs.map((d, i) => (
               <tr
                 key={i}
-                className={
-                  i % 2 ? "bg-white/[0.015]" : "bg-transparent"
-                }
+                className="border-t border-fg/6 first:border-t-0 sm:first:border-t max-sm:grid max-sm:grid-cols-[1fr_auto_1fr] max-sm:items-center max-sm:gap-x-2 max-sm:gap-y-1.5 max-sm:px-4 max-sm:py-3"
               >
-                <td className="py-[7px] px-2.5 border-b border-white/[0.04] font-mono text-[13px] text-amber-400">
-                  {d.js}
+                <td className="px-4 py-2.5 align-top max-sm:p-0">
+                  <span className={`${chip} bg-js/10 text-js`}>{d.js}</span>
                 </td>
-                <td className="py-[7px] px-2.5 border-b border-white/[0.04] font-mono text-[13px] text-brand-green-light">
-                  {d.py}
+                <td aria-hidden="true" className="hidden max-sm:block text-muted">
+                  <ArrowRight size={14} />
                 </td>
-                <td className="py-[7px] px-2.5 border-b border-white/[0.04] text-txt-muted">
-                  {d.note}
+                <td className="px-4 py-2.5 align-top max-sm:p-0">
+                  <span className={`${chip} bg-py/10 text-py`}>{d.py}</span>
+                </td>
+                <td className="px-4 py-2.5 align-top text-[13.5px] text-text-2 max-sm:col-span-3 max-sm:p-0">
+                  <InlineText text={d.note} />
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
-    </div>
+    </section>
   );
 }

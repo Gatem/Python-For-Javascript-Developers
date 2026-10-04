@@ -5,6 +5,7 @@ import { useResponsive } from "./hooks/useResponsive";
 import { useExercise } from "./hooks/useExercise";
 import { useNotes } from "./hooks/useNotes";
 import { useActivity } from "./hooks/useActivity";
+import { useTheme } from "./hooks/useTheme";
 import Header from "./components/layout/Header";
 import Sidebar from "./components/layout/Sidebar";
 import MobileSidebar from "./components/layout/MobileSidebar";
@@ -15,6 +16,7 @@ import CelebrationDialog from "./components/celebration/CelebrationDialog";
 
 export default function App() {
   const course = useCourseState();
+  const { theme, toggleTheme } = useTheme();
   const { isMobile, isWide, menuOpen, toggleMenu, closeMenu } = useResponsive();
   const { activity, celebration, recordCompletion, dismissCelebration } = useActivity();
   const { markComplete, done } = course;
@@ -57,30 +59,39 @@ export default function App() {
   };
 
   return (
-    <div className="font-sans min-h-screen bg-linear-145 from-surface-base via-surface-card to-[#0f172a] text-txt-primary">
+    <div className="min-h-screen font-sans text-text">
       <a
         href="#lesson-main"
         onClick={(e) => {
           e.preventDefault();
           document.getElementById("lesson-main")?.focus();
         }}
-        className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[200] focus:px-4 focus:py-2 focus:rounded-lg focus:bg-brand-green focus:text-white"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-[200] focus:rounded-xl focus:bg-accent focus:px-4 focus:py-2 focus:text-accent-fg"
       >
         Skip to lesson
       </a>
-      <Header activity={activity} isMobile={isMobile} />
-      <div className="flex w-full min-h-[calc(100vh-90px)]">
-        {!isMobile && <Sidebar {...navProps} />}
-        {isMobile && (
-          <MobileSidebar isOpen={menuOpen} onToggle={toggleMenu} onClose={closeMenu} {...navProps} />
+      <Header
+        activity={activity}
+        theme={theme}
+        onToggleTheme={toggleTheme}
+        isMobile={isMobile}
+        menuOpen={menuOpen}
+        onMenu={toggleMenu}
+        completedCount={course.completedCount}
+        totalLessons={course.totalLessons}
+      />
+      <div className="flex w-full">
+        {isMobile ? (
+          <MobileSidebar isOpen={menuOpen} onClose={closeMenu} {...navProps} />
+        ) : (
+          <Sidebar {...navProps} />
         )}
         <LessonView
           mod={course.mod}
           lesson={course.lesson}
           lessonKey={course.current}
-          isMobile={isMobile}
-          isFirst={course.isFirst}
-          isLast={course.isLast}
+          prev={lessonList[course.index - 1]}
+          next={lessonList[course.index + 1]}
           isDone={!!course.done[course.current]}
           onPrev={() => course.nav(-1)}
           onNext={() => course.nav(1)}

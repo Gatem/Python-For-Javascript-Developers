@@ -2,6 +2,10 @@
   "name": "python-for-js-devs",
   "private": true,
   "version": "1.0.0",
+  "description": "Interactive Python course for JavaScript developers, with exercises that run real Python in the browser.",
+  "author": "Sabry E. Farrag (https://www.linkedin.com/in/sabry-elsayed)",
+  "license": "MIT",
+  "homepage": "https://gatem.github.io/Python-For-Javascript-Developers/",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -12,6 +16,7 @@
     "test:exercises": "vitest run src/data"
   },
   "dependencies": {
+    "lucide-react": "^1.52.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0"
   },

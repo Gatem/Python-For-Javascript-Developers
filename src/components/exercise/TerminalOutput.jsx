@@ -1,55 +1,62 @@
-const LINE_STYLES = {
-  success: "text-term-success",
-  warning: "text-term-warning",
-  error: "text-term-error",
-};
+import { X, CircleCheck, CircleX, TriangleAlert, Terminal } from "lucide-react";
 
-const ICONS = { success: "✅ ", warning: "⚠️ ", error: "❌ " };
+const ICON = { error: CircleX, warning: TriangleAlert, success: CircleCheck };
+const COLOR = { error: "text-[var(--t-err)]", warning: "text-[var(--t-warn)]", success: "text-[var(--t-ok)]" };
 
 function Line({ type, children }) {
+  const Icon = ICON[type];
   return (
-    <div className={`py-0.5 whitespace-pre-wrap ${LINE_STYLES[type] || "text-txt-muted"}`}>
-      <span aria-hidden="true">{ICONS[type]}</span>
-      {children}
+    <div className={`flex gap-2 py-0.5 whitespace-pre-wrap ${COLOR[type] || ""}`}>
+      {Icon && <Icon aria-hidden="true" size={15} className="mt-[3px] shrink-0" />}
+      <span>{children}</span>
     </div>
   );
 }
 
 // Shows the real result of running or checking the learner's code.
+// Always dark, like a real terminal.
 export default function TerminalOutput({ result, onClear }) {
   if (!result) return null;
   const { kind, pass, errors = [], warnings = [], stdout, error, testFailure } = result;
   const ran = stdout != null || error != null || testFailure != null;
-  const title = kind === "check" ? "check solution" : "python solution.py";
 
-  let summary;
-  if (kind === "check") {
-    summary = pass
-      ? { type: "success", text: "All checks and hidden tests passed. Lesson complete!" }
-      : { type: "error", text: errors.length ? "Fix the issues above, then check again." : "Not quite yet. See the details above." };
-  } else if (error) {
-    summary = { type: "error", text: "Your code raised an error." };
-  }
+  let status = null;
+  if (kind === "check") status = pass ? "passed" : "failed";
+  else if (error) status = "error";
+
+  const badge = {
+    passed: "bg-[var(--t-ok)]/15 text-[var(--t-ok)]",
+    failed: "bg-[var(--t-err)]/15 text-[var(--t-err)]",
+    error: "bg-[var(--t-err)]/15 text-[var(--t-err)]",
+  };
 
   return (
-    <div className="font-mono text-[13px] leading-[1.7] bg-[#0c0c0c] rounded-lg overflow-hidden mt-3.5 border border-white/[0.08]">
-      <div className="bg-[#1a1a2e] px-3 py-1.5 text-[12px] text-txt-dim flex items-center gap-1.5 border-b border-white/[0.06]">
-        <span aria-hidden="true" className="text-term-error text-[9px]">{"●"}</span>
-        <span aria-hidden="true" className="text-term-warning text-[9px]">{"●"}</span>
-        <span aria-hidden="true" className="text-term-success text-[9px]">{"●"}</span>
-        <span className="ml-1.5">{title}</span>
+    <div className="terminal mt-4 overflow-hidden rounded-2xl border border-black/20 bg-[var(--t-bg)] font-mono text-[13px] leading-[1.7] text-[var(--t-text)] shadow-card">
+      <div className="flex items-center gap-2 border-b border-white/[0.06] bg-[var(--t-bar)] px-3.5 py-2 text-[12px] text-[var(--t-dim)]">
+        <span aria-hidden="true" className="flex gap-1.5">
+          <span className="size-2.5 rounded-full bg-[#ff5f57]" />
+          <span className="size-2.5 rounded-full bg-[#febc2e]" />
+          <span className="size-2.5 rounded-full bg-[#28c840]" />
+        </span>
+        <Terminal aria-hidden="true" size={13} className="ml-2" />
+        <span>{kind === "check" ? "check solution" : "python solution.py"}</span>
+        {status && (
+          <span className={`ml-2 rounded-full px-2 py-px font-sans text-[11px] font-semibold uppercase tracking-wide ${badge[status]}`}>
+            {status}
+          </span>
+        )}
         {onClear && (
           <button
             type="button"
             onClick={onClear}
             aria-label="Clear output"
-            className="ml-auto text-txt-dim hover:text-txt-secondary bg-transparent border-none cursor-pointer text-[12px]"
+            className="ml-auto rounded-md p-1 text-[var(--t-dim)] hover:bg-white/10 hover:text-white cursor-pointer"
           >
-            <span aria-hidden="true">{"✕"}</span>
+            <X aria-hidden="true" size={14} />
           </button>
         )}
       </div>
-      <div className="p-3 max-h-[320px] overflow-y-auto">
+      <div className="max-h-[340px] overflow-y-auto scroll-thin p-4">
         {errors.map((e, i) => (
           <Line key={`e${i}`} type={e.type}>{e.msg}</Line>
         ))}
@@ -58,24 +65,33 @@ export default function TerminalOutput({ result, onClear }) {
         ))}
         {ran && (
           <>
-            <div className="text-txt-dim mb-1 mt-1">$ python solution.py</div>
+            <div className="text-[var(--t-dim)]">
+              <span className="text-[var(--t-ok)]">$</span> python solution.py
+            </div>
             {stdout ? (
-              <div className="text-txt-primary whitespace-pre-wrap">{stdout.replace(/\n$/, "")}</div>
+              <div className="whitespace-pre-wrap">{stdout.replace(/\n$/, "")}</div>
             ) : (
-              !error && <div className="text-txt-dim italic">(no output)</div>
+              !error && <div className="italic text-[var(--t-dim)]">(no output)</div>
             )}
-            {error && <div className="text-term-error whitespace-pre-wrap mt-1">{error}</div>}
+            {error && <div className="mt-1 whitespace-pre-wrap text-[var(--t-err)]">{error}</div>}
             {testFailure && (
-              <div className="mt-2 border-t border-white/[0.06] pt-2">
+              <div className="mt-3 border-t border-white/[0.06] pt-3">
                 <Line type="error">{testFailure}</Line>
               </div>
             )}
           </>
         )}
-        {summary && (
-          <div className={`mt-2 border-t border-white/[0.06] pt-2 ${LINE_STYLES[summary.type]}`}>
-            {summary.text}
+        {kind === "check" && (
+          <div className={`mt-3 border-t border-white/[0.06] pt-3 font-sans text-[13.5px] font-medium ${pass ? "text-[var(--t-ok)]" : "text-[var(--t-err)]"}`}>
+            {pass
+              ? "All checks and hidden tests passed. Lesson complete!"
+              : errors.length
+                ? "Fix the issues above, then check again."
+                : "Not quite yet. See the details above."}
           </div>
+        )}
+        {kind === "run" && error && (
+          <div className="mt-3 border-t border-white/[0.06] pt-3 font-sans text-[13.5px] text-[var(--t-err)]">Your code raised an error.</div>
         )}
       </div>
     </div>

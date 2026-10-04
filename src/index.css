@@ -1,47 +1,186 @@
-@import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Outfit:wght@300;400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap");
 @import "tailwindcss";
 
-@theme {
-  --font-sans: "Outfit", system-ui, sans-serif;
-  --font-mono: "JetBrains Mono", monospace;
+/* Dark mode follows the data-theme attribute set by src/lib/theme.js
+   (and by the inline script in index.html before first paint). */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
-  --color-brand-green: #10b981;
-  --color-brand-green-dark: #059669;
-  --color-brand-green-light: #6ee7b7;
-  --color-brand-blue: #3b82f6;
-  --color-brand-blue-light: #60a5fa;
+/* ---------------------------------------------------------------------------
+   Design tokens. Components only use these semantic names, so both themes are
+   defined in one place. `fg` is the base ink colour: `bg-fg/5` or
+   `border-fg/10` give a subtle overlay that works in light and dark.
+--------------------------------------------------------------------------- */
+:root,
+:root[data-theme="light"] {
+  color-scheme: light;
+  --bg: #f5f7fb;
+  --surface: #ffffff;
+  --surface-2: #f2f5f9;
+  --surface-3: #e8edf4;
+  --fg: #0f172a;
+  --text: #0f172a;
+  --text-2: #334155;
+  --muted: #586274;
+  --accent: #047857;
+  --accent-strong: #065f46;
+  --accent-fg: #ffffff;
+  --accent-text: #047857;
+  --info: #2563eb;
+  --info-text: #1d4ed8;
+  --js: #92400e;
+  --py: #047857;
+  --warn: #b45309;
+  --danger: #b91c1c;
+  --success: #15803d;
+  --code: #f8fafc;
+  --glow-1: rgba(16, 185, 129, 0.10);
+  --glow-2: rgba(59, 130, 246, 0.08);
+  --shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 4px 16px rgba(15, 23, 42, 0.06);
 
-  --color-term-success: #4ade80;
-  --color-term-warning: #fbbf24;
-  --color-term-error: #f87171;
-  --color-term-muted: #94a3b8;
+  --syn-kw: #7c3aed;
+  --syn-str: #15803d;
+  --syn-num: #c2410c;
+  --syn-com: #5f6672;
+  --syn-fn: #1d4ed8;
+  --syn-builtin: #b45309;
+  --syn-cls: #a16207;
+  --syn-dec: #be123c;
+  --syn-punct: #475569;
+}
 
-  --color-surface-base: #0a0e1a;
-  --color-surface-card: #111827;
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #090c13;
+  --surface: #0f131c;
+  --surface-2: #141925;
+  --surface-3: #1a2030;
+  --fg: #e6ebf3;
+  --text: #e6ebf3;
+  --text-2: #b4bfcf;
+  --muted: #8a96aa;
+  --accent: #34d399;
+  --accent-strong: #10b981;
+  --accent-fg: #03140d;
+  --accent-text: #6ee7b7;
+  --info: #60a5fa;
+  --info-text: #93c5fd;
+  --js: #fbbf24;
+  --py: #34d399;
+  --warn: #fbbf24;
+  --danger: #f87171;
+  --success: #4ade80;
+  --code: #0c1018;
+  --glow-1: rgba(16, 185, 129, 0.10);
+  --glow-2: rgba(59, 130, 246, 0.10);
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 28px rgba(0, 0, 0, 0.28);
 
-  --color-txt-primary: #e2e8f0;
-  --color-txt-secondary: #cbd5e1;
-  --color-txt-muted: #94a3b8;
-  /* Both meet WCAG AA (4.5:1) on the dark surfaces. */
-  --color-txt-dim: #8593a8;
-  --color-txt-dimmer: #7c8aa0;
+  --syn-kw: #c792ea;
+  --syn-str: #a5d6a7;
+  --syn-num: #f78c6c;
+  --syn-com: #7d8aa0;
+  --syn-fn: #82aaff;
+  --syn-builtin: #ffcb6b;
+  --syn-cls: #ffcb6b;
+  --syn-dec: #f07178;
+  --syn-punct: #94a3b8;
+}
+
+@theme inline {
+  --font-sans: "Geist", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+  --color-fg: var(--fg);
+  --color-text: var(--text);
+  --color-text-2: var(--text-2);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-accent-strong: var(--accent-strong);
+  --color-accent-fg: var(--accent-fg);
+  --color-accent-text: var(--accent-text);
+  --color-info: var(--info);
+  --color-info-text: var(--info-text);
+  --color-js: var(--js);
+  --color-py: var(--py);
+  --color-warn: var(--warn);
+  --color-danger: var(--danger);
+  --color-success: var(--success);
+  --color-code: var(--code);
+
+  --shadow-card: var(--shadow);
+}
+
+html {
+  background: var(--bg);
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
   margin: 0;
-  padding: 0;
-  background: var(--color-surface-base);
-  color-scheme: dark;
+  background:
+    radial-gradient(1200px 600px at 10% -10%, var(--glow-1), transparent 60%),
+    radial-gradient(900px 500px at 100% 0%, var(--glow-2), transparent 55%),
+    var(--bg);
+  background-attachment: fixed;
+  color: var(--text);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::selection {
+  background: color-mix(in oklab, var(--info) 30%, transparent);
 }
 
 :focus-visible {
-  outline: 2px solid var(--color-brand-blue-light);
+  outline: 2px solid var(--info);
   outline-offset: 2px;
+  border-radius: 6px;
 }
 
 .code-editor-textarea:focus-visible,
 #lesson-main:focus-visible {
   outline: none;
+}
+
+/* Thin, theme-aware scrollbars */
+.scroll-thin {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in oklab, var(--fg) 18%, transparent) transparent;
+}
+
+/* Syntax highlighting (src/lib/highlight.js) */
+.tok-kw { color: var(--syn-kw); }
+.tok-str { color: var(--syn-str); }
+.tok-num { color: var(--syn-num); }
+.tok-com { color: var(--syn-com); font-style: italic; }
+.tok-fn { color: var(--syn-fn); }
+.tok-builtin { color: var(--syn-builtin); }
+.tok-cls { color: var(--syn-cls); }
+.tok-dec { color: var(--syn-dec); }
+.tok-punct { color: var(--syn-punct); }
+
+/* The terminal stays dark in both themes, like a real terminal. */
+.terminal {
+  --t-bg: #0b0e14;
+  --t-bar: #121722;
+  --t-text: #e2e8f0;
+  --t-dim: #8a96aa;
+  --t-ok: #4ade80;
+  --t-warn: #fbbf24;
+  --t-err: #f87171;
+}
+
+.code-editor-textarea::selection {
+  background: color-mix(in oklab, var(--info) 35%, transparent);
+  color: transparent;
+}
+
+.code-editor-textarea::placeholder {
+  color: var(--muted);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -53,21 +192,4 @@ body {
     animation-iteration-count: 1 !important;
     scroll-behavior: auto !important;
   }
-}
-
-.custom-scrollbar::-webkit-scrollbar {
-  width: 6px;
-}
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 3px;
-}
-
-.code-editor-textarea::selection {
-  background: rgba(59, 130, 246, 0.35);
-  color: transparent;
-}
-
-.code-editor-textarea::placeholder {
-  color: var(--color-txt-dimmer);
 }

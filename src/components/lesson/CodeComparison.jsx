@@ -1,26 +1,17 @@
-import StyledCode from "./StyledCode";
+import { Columns2 } from "lucide-react";
+import Code from "../ui/Code";
+import SectionTitle from "./SectionTitle";
 
-export default function CodeComparison({ jsCode, pyCode, isMobile }) {
+export default function CodeComparison({ jsCode, pyCode }) {
   return (
-    <div
-      className={`grid gap-3.5 my-5 ${isMobile ? "grid-cols-1" : "grid-cols-2"}`}
-    >
-      <div>
-        <div className="mb-1.5">
-          <span className="inline-block px-2.5 py-0.5 rounded-full text-[12px] font-semibold bg-amber-500/12 text-amber-400 border border-amber-500/25">
-            JavaScript
-          </span>
-        </div>
-        <StyledCode code={jsCode} variant="js" label="JavaScript example" />
+    <section aria-labelledby="compare-heading">
+      <SectionTitle id="compare-heading" icon={Columns2}>
+        Side by side
+      </SectionTitle>
+      <div className="grid gap-4 xl:grid-cols-2">
+        <Code code={jsCode} lang="js" />
+        <Code code={pyCode} lang="py" />
       </div>
-      <div>
-        <div className="mb-1.5">
-          <span className="inline-block px-2.5 py-0.5 rounded-full text-[12px] font-semibold bg-emerald-500/12 text-brand-green-light border border-emerald-500/25">
-            Python
-          </span>
-        </div>
-        <StyledCode code={pyCode} variant="py" label="Python example" />
-      </div>
-    </div>
+    </section>
   );
 }

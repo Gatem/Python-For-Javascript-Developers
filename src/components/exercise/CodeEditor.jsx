@@ -1,23 +1,7 @@
 import { useState, useRef, useCallback, useId } from "react";
+import { Check, Copy, Eraser } from "lucide-react";
+import { HighlightedLines } from "../ui/Code";
 
-function findInlineComment(line) {
-  let inStr = null;
-  for (let i = 0; i < line.length; i++) {
-    const ch = line[i];
-    if (ch === "\\" && inStr) {
-      i++;
-      continue;
-    }
-    if ((ch === '"' || ch === "'") && !inStr) {
-      inStr = ch;
-    } else if (ch === inStr) {
-      inStr = null;
-    } else if (ch === "#" && !inStr) {
-      return i;
-    }
-  }
-  return -1;
-}
 
 const AUTO_PAIRS = { "(": ")", "[": "]", "{": "}", "'": "'", '"': '"' };
 const BRACKET_CLOSERS = new Set([")", "]", "}"]);
@@ -57,11 +41,11 @@ export default function CodeEditor({ value, onChange, placeholder, onRun, onChec
     }
   };
 
-  const setCursor = (ta, pos) =>
-    requestAnimationFrame(() => ta.setSelectionRange(pos, pos));
+  // execCommand updates the textarea synchronously, so the caret can be
+  // placed right away (deferring it races with fast typing).
+  const setCursor = (ta, pos) => ta.setSelectionRange(pos, pos);
 
-  const setSelection = (ta, from, to) =>
-    requestAnimationFrame(() => ta.setSelectionRange(from, to));
+  const setSelection = (ta, from, to) => ta.setSelectionRange(from, to);
 
   const handleKey = (e) => {
     const ta = taRef.current;
@@ -265,97 +249,77 @@ export default function CodeEditor({ value, onChange, placeholder, onRun, onChec
     if (taRef.current) taRef.current.focus();
   };
 
+  const kbd = "rounded border border-fg/12 bg-surface px-1 py-px font-mono text-[11px] text-text-2";
+  const toolBtn =
+    "inline-flex items-center gap-1 rounded-md px-2 py-1 text-[12px] text-muted hover:text-text hover:bg-fg/8 cursor-pointer transition-colors";
+
   return (
     <div>
-      <div className="flex justify-between items-center mb-1.5">
-        <label htmlFor={`${helpId}-editor`} className="text-[12px] text-txt-muted">
-          Your solution:
-        </label>
-        <div className="flex gap-1.5">
-          <button
-            type="button"
-            onClick={copyCode}
-            className={`bg-white/5 border border-white/10 rounded-[5px] text-[11px] px-2.5 py-[3px] cursor-pointer font-sans ${copied ? "text-term-success" : "text-txt-muted"}`}
+      <div className="overflow-hidden rounded-2xl border border-fg/12 bg-code transition-shadow focus-within:border-info/50 focus-within:ring-4 focus-within:ring-info/15">
+        <div className="flex items-center justify-between border-b border-fg/8 bg-surface-2/60 pl-1.5 pr-2">
+          <label
+            htmlFor={`${helpId}-editor`}
+            className="-mb-px flex items-center gap-2 border-b-2 border-accent px-2.5 py-2 font-mono text-[12.5px] text-text"
           >
-            {copied ? "Copied!" : "Copy"}
-          </button>
-          <button
-            type="button"
-            onClick={clearCode}
-            className="bg-white/5 border border-white/10 rounded-[5px] text-txt-muted text-[11px] px-2.5 py-[3px] cursor-pointer font-sans"
-          >
-            Clear
-          </button>
+            <span aria-hidden="true" className="size-2 rounded-full bg-py" />
+            solution.py
+          </label>
+          <div className="flex items-center gap-0.5">
+            <button type="button" onClick={copyCode} className={toolBtn} aria-label={copied ? "Copied" : "Copy your code"}>
+              {copied ? <Check size={13} aria-hidden="true" /> : <Copy size={13} aria-hidden="true" />}
+              <span className="max-sm:sr-only">{copied ? "Copied" : "Copy"}</span>
+            </button>
+            <button type="button" onClick={clearCode} className={toolBtn} aria-label="Clear the editor">
+              <Eraser size={13} aria-hidden="true" />
+              <span className="max-sm:sr-only">Clear</span>
+            </button>
+          </div>
         </div>
-      </div>
-      <div className="flex rounded-lg overflow-hidden border border-white/10 bg-black/30 focus-within:border-brand-blue/60 focus-within:ring-2 focus-within:ring-brand-blue/30">
-        <div aria-hidden="true" className="py-3 min-w-[40px] text-right select-none border-r border-white/[0.06] bg-black/15 font-mono text-[14px] leading-[1.7] text-txt-dimmer shrink-0">
-          {Array.from({ length: lineCount }, (_, i) => (
-            <div
-              key={i}
-              className="pr-2 h-[23.8px] flex items-center justify-end"
-            >
-              {i + 1}
-            </div>
-          ))}
-        </div>
-        <div className="relative flex-1 min-h-[130px]">
-          <pre
-            ref={highlightRef}
+        <div className="flex">
+          <div
             aria-hidden="true"
-            className="absolute inset-0 font-mono text-[14px] leading-[1.7] p-3 m-0 whitespace-pre overflow-hidden pointer-events-none"
-            style={{ tabSize: 4, overflowWrap: "normal" }}
+            className="shrink-0 select-none border-r border-fg/6 py-3 pl-3 pr-2.5 text-right font-mono text-[13.5px] leading-[1.7] text-muted/70"
           >
-            {lines.map((line, i) => {
-              if (!line) return <div key={i}>{" "}</div>;
-              const trimmed = line.trimStart();
-              if (trimmed.startsWith("#")) {
-                return (
-                  <div key={i} className="text-brand-green-light/50 italic">
-                    {line}
-                  </div>
-                );
-              }
-              const commentIdx = findInlineComment(line);
-              if (commentIdx === -1) {
-                return (
-                  <div key={i} className="text-txt-primary">{line}</div>
-                );
-              }
-              return (
-                <div key={i}>
-                  <span className="text-txt-primary">
-                    {line.slice(0, commentIdx)}
-                  </span>
-                  <span className="text-brand-green-light/50 italic">
-                    {line.slice(commentIdx)}
-                  </span>
-                </div>
-              );
-            })}
-          </pre>
-          <textarea
-            id={`${helpId}-editor`}
-            aria-describedby={helpId}
-            autoCapitalize="off"
-            autoCorrect="off"
-            ref={taRef}
-            value={value}
-            onChange={(e) => onChange(e.target.value)}
-            onKeyDown={handleKey}
-            onPaste={handlePaste}
-            onScroll={syncScroll}
-            placeholder={placeholder}
-            spellCheck={false}
-            className="code-editor-textarea relative w-full h-full min-h-[130px] font-mono text-[14px] leading-[1.7] bg-transparent border-none text-transparent caret-txt-primary p-3 resize-y text-left box-border outline-none whitespace-pre overflow-auto z-10"
-            style={{ tabSize: 4, overflowWrap: "normal" }}
-          />
+            {Array.from({ length: lineCount }, (_, i) => (
+              <div key={i}>{i + 1}</div>
+            ))}
+          </div>
+          <div className="relative min-h-[170px] flex-1">
+            <pre
+              ref={highlightRef}
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-0 m-0 overflow-hidden whitespace-pre p-3 font-mono text-[13.5px] leading-[1.7] text-text"
+              style={{ tabSize: 4, overflowWrap: "normal" }}
+            >
+              <HighlightedLines code={value || ""} lang="py" />
+              {"\n"}
+            </pre>
+            <textarea
+              id={`${helpId}-editor`}
+              aria-describedby={helpId}
+              autoCapitalize="off"
+              autoCorrect="off"
+              ref={taRef}
+              value={value}
+              onChange={(e) => onChange(e.target.value)}
+              onKeyDown={handleKey}
+              onPaste={handlePaste}
+              onScroll={syncScroll}
+              placeholder={placeholder}
+              spellCheck={false}
+              className="code-editor-textarea relative z-10 box-border block h-full min-h-[170px] w-full resize-y overflow-auto whitespace-pre border-none bg-transparent p-3 text-left font-mono text-[13.5px] leading-[1.7] text-transparent caret-text outline-none"
+              style={{ tabSize: 4, overflowWrap: "normal" }}
+            />
+          </div>
         </div>
       </div>
-      <div id={helpId} className="text-[12px] text-txt-dimmer mt-1 text-right">
-        Ctrl+Enter run {"·"} Ctrl+Shift+Enter check {"·"} Tab indent {"·"} Esc
-        then Tab to leave the editor {"·"} Ctrl+/ comment {"·"} Ctrl+D duplicate
-      </div>
+      <p id={helpId} className="m-0 mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[12px] text-muted">
+        <span><kbd className={kbd}>Ctrl</kbd> + <kbd className={kbd}>Enter</kbd> run</span>
+        <span><kbd className={kbd}>Ctrl</kbd> + <kbd className={kbd}>Shift</kbd> + <kbd className={kbd}>Enter</kbd> check</span>
+        <span><kbd className={kbd}>Tab</kbd> indent</span>
+        <span><kbd className={kbd}>Esc</kbd> then <kbd className={kbd}>Tab</kbd> to leave the editor</span>
+        <span className="max-md:hidden"><kbd className={kbd}>Ctrl</kbd> + <kbd className={kbd}>/</kbd> comment</span>
+      </p>
     </div>
   );
 }

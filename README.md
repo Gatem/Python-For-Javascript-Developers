@@ -4,6 +4,8 @@ An interactive course that teaches Python by mapping it to what you already know
 
 **[▶ Start learning](https://gatem.github.io/Python-For-Javascript-Developers/)**
 
+Created by **[Sabry E. Farrag](https://www.linkedin.com/in/sabry-elsayed)**.
+
 ## What's inside
 
 33 lessons in 13 modules, from first steps to professional tooling. The course targets Python 3.12+, and your code runs on Python 3.14 in the browser via [Pyodide](https://pyodide.org).
@@ -29,6 +31,9 @@ Other features:
 - **Saved progress**: progress and code are stored in your browser.
 - **Daily streaks.**
 - **Deep links**: every lesson has its own URL (`#/module/lesson`).
+- **Light and dark themes**: follows your system setting, with a toggle in the header.
+- **Syntax highlighting**: in the examples and in the editor as you type.
+- **Works on any screen**: from phones to wide monitors.
 
 ## How exercises are checked
 
@@ -94,8 +99,12 @@ Run `npm run test:exercises` after editing. It confirms that every reference ans
 
 ## Tech
 
-React 19, Vite, Tailwind CSS 4, Pyodide (loaded from the jsDelivr CDN on first run), Vitest, and ESLint with `jsx-a11y`.
+React 19, Vite, Tailwind CSS 4 (design tokens for light and dark themes), lucide icons, Pyodide (loaded from the jsDelivr CDN on first run), Vitest, and ESLint with `jsx-a11y`.
+
+## Author
+
+**Sabry E. Farrag**: [LinkedIn](https://www.linkedin.com/in/sabry-elsayed)
 
 ## License
 
-[MIT](LICENSE)
+[MIT](LICENSE) © Sabry E. Farrag

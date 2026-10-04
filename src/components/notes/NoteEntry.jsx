@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { Pencil, Trash2, Quote } from "lucide-react";
 
 export default function NoteEntry({
   entry,
@@ -57,15 +58,19 @@ export default function NoteEntry({
     e.target.style.height = e.target.scrollHeight + "px";
   };
 
+  const actionBtn =
+    "inline-flex items-center gap-1 rounded-md px-1.5 py-1 text-[12px] text-muted cursor-pointer transition-colors";
+
   return (
-    <div className="px-4 py-3 border-b border-white/[0.04]">
+    <div className="group rounded-2xl border border-fg/8 bg-surface p-3.5 shadow-card">
       {entry.type === "quote" && (
-        <div className="mb-2 pl-3 border-l-2 border-brand-blue/40 text-[13px] text-brand-blue-light/70 italic leading-relaxed">
-          <sup className="text-[10px] text-brand-blue-light font-semibold not-italic mr-1">
-            [{entry.refNum}]
-          </sup>
-          &ldquo;{entry.quote}&rdquo;
-        </div>
+        <blockquote className="m-0 mb-2.5 flex gap-2 rounded-xl bg-info/[0.07] px-3 py-2 text-[13px] italic leading-relaxed text-text-2">
+          <Quote aria-hidden="true" size={14} className="mt-0.5 shrink-0 text-info" />
+          <span>
+            <sup className="mr-1 text-[11px] font-semibold not-italic text-info-text">[{entry.refNum}]</sup>
+            {entry.quote}
+          </span>
+        </blockquote>
       )}
 
       {editing ? (
@@ -76,63 +81,51 @@ export default function NoteEntry({
             value={text}
             onChange={handleInput}
             onKeyDown={handleKeyDown}
-            placeholder={
-              entry.type === "quote"
-                ? "Add a note about this quote..."
-                : "Write your note..."
-            }
-            className="w-full bg-white/5 border border-white/10 rounded-md p-2.5 text-[13.5px] text-txt-secondary leading-relaxed resize-none outline-none font-sans min-h-[56px] placeholder:text-txt-dimmer focus:border-brand-blue/30"
+            placeholder={entry.type === "quote" ? "Add a thought about this quote..." : "Write your note..."}
+            className="min-h-[64px] w-full resize-none rounded-xl border border-fg/12 bg-surface-2 p-2.5 font-sans text-[13.5px] leading-relaxed text-text outline-none placeholder:text-muted focus:border-info/50 focus:ring-4 focus:ring-info/15"
           />
-          <div className="flex items-center gap-2 mt-1.5">
+          <div className="mt-2 flex items-center gap-1.5">
             <button
               type="button"
               onClick={save}
-              className="text-[12px] font-semibold text-term-success bg-term-success/10 px-2.5 py-1 rounded cursor-pointer border-none hover:bg-term-success/20 transition-colors"
+              className="rounded-lg bg-accent px-3 py-1 text-[12.5px] font-medium text-accent-fg hover:bg-accent-strong cursor-pointer"
             >
               Save
             </button>
             <button
               type="button"
               onClick={discard}
-              className="text-[12px] text-txt-muted px-2.5 py-1 rounded cursor-pointer border-none hover:text-txt-secondary transition-colors"
+              className="rounded-lg px-3 py-1 text-[12.5px] text-muted hover:bg-fg/6 hover:text-text cursor-pointer"
             >
               Cancel
             </button>
-            <span className="text-[10px] text-txt-dimmer ml-auto">
-              Ctrl+Enter to save
-            </span>
+            <span className="ml-auto text-[11.5px] text-muted">Ctrl+Enter to save</span>
           </div>
         </div>
       ) : (
-        <div className="group">
+        <div>
           {entry.text ? (
-            <p className="text-[13.5px] text-txt-secondary leading-relaxed m-0 whitespace-pre-wrap">
-              {entry.text}
-            </p>
+            <p className="m-0 whitespace-pre-wrap text-[13.5px] leading-relaxed text-text">{entry.text}</p>
           ) : entry.type === "quote" ? (
             <button
               type="button"
-              className="text-[12px] text-txt-dimmer italic m-0 p-0 bg-transparent border-none font-sans cursor-pointer hover:text-txt-muted transition-colors"
+              className="m-0 cursor-pointer border-none bg-transparent p-0 font-sans text-[12.5px] italic text-muted hover:text-text"
               onClick={startEditing}
             >
-              Click to add a note...
+              Add a thought about this quote...
             </button>
           ) : null}
-          <div className="flex gap-2 mt-1.5 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 [@media(hover:none)]:opacity-100 transition-opacity">
-            <button
-              type="button"
-              onClick={startEditing}
-              className="text-[12px] text-txt-dim cursor-pointer border-none bg-transparent hover:text-brand-blue-light transition-colors"
-            >
-              Edit
+          <div className="mt-1.5 flex gap-1 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100 [@media(hover:none)]:opacity-100">
+            <button type="button" onClick={startEditing} className={`${actionBtn} hover:bg-fg/6 hover:text-text`}>
+              <Pencil aria-hidden="true" size={12} /> Edit
             </button>
             <button
               type="button"
               aria-label="Delete note"
               onClick={() => onDelete(entry.id)}
-              className="text-[12px] text-txt-dim cursor-pointer border-none bg-transparent hover:text-term-error transition-colors"
+              className={`${actionBtn} hover:bg-danger/10 hover:text-danger`}
             >
-              Delete
+              <Trash2 aria-hidden="true" size={12} /> Delete
             </button>
           </div>
         </div>
