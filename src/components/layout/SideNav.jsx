@@ -2,7 +2,7 @@ import { CircleCheck, Circle, RotateCcw } from "lucide-react";
 import { TIERS } from "../../data";
 import ProgressRing from "../ui/ProgressRing";
 import { ModuleIcon, TierIcon } from "../ui/moduleIcons";
-import AuthorCard from "./AuthorCard";
+import { linkProps } from "../../lib/routes";
 
 function buildTierGroups(modules) {
   const byTier = {};
@@ -52,11 +52,9 @@ export default function SideNav({ modules, current, done, completedCount, totalL
                 const complete = doneCount === total;
                 return (
                   <li key={m.id}>
-                    <button
-                      type="button"
-                      onClick={() => onSelect(keyOf(m, m.lessons[0]))}
-                      aria-expanded={isCurrentMod}
-                      className={`group flex w-full items-center gap-3 rounded-xl px-2 py-2 text-left cursor-pointer transition-colors ${
+                    <a
+                      {...linkProps(keyOf(m, m.lessons[0]), onSelect)}
+                      className={`group flex no-underline w-full items-center gap-3 rounded-xl px-2 py-2 text-left cursor-pointer transition-colors ${
                         isCurrentMod ? "bg-accent/10" : "hover:bg-fg/5"
                       }`}
                     >
@@ -84,7 +82,7 @@ export default function SideNav({ modules, current, done, completedCount, totalL
                           <span className="sr-only"> lessons done</span>
                         </span>
                       ) : null}
-                    </button>
+                    </a>
 
                     {isCurrentMod && (
                       <ul className="relative m-0 mb-1 ml-[1.55rem] list-none border-l border-fg/10 p-0 py-1">
@@ -95,11 +93,7 @@ export default function SideNav({ modules, current, done, completedCount, totalL
                           return (
                             <li key={l.id}>
                               <a
-                                href={`#/${key}`}
-                                onClick={(e) => {
-                                  e.preventDefault();
-                                  onSelect(key);
-                                }}
+                                {...linkProps(key, onSelect)}
                                 aria-current={isCurrent ? "page" : undefined}
                                 className={`relative -ml-px flex items-center gap-2.5 border-l-2 py-1.5 pl-4 pr-2 text-[13.5px] no-underline transition-colors ${
                                   isCurrent
@@ -132,8 +126,7 @@ export default function SideNav({ modules, current, done, completedCount, totalL
         );
       })}
 
-      <div className="mt-auto space-y-3 pt-2">
-        <AuthorCard />
+      <div className="mt-auto pt-2">
         {completedCount > 0 && (
           <button
             type="button"

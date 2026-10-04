@@ -1,55 +1,70 @@
 import { useState, useEffect, useCallback } from "react";
 import { lessonList } from "../data";
 import { KEYS, readJSON, writeJSON } from "../lib/storage";
+import { HOME, pathFor, routeFromLocation } from "../lib/routes";
 
 const indexByKey = new Map(lessonList.map((entry, i) => [entry.key, i]));
 const FIRST_KEY = lessonList[0].key;
+const isKnown = (key) => indexByKey.has(key);
+const isBrowser = typeof window !== "undefined";
 
-// The current lesson lives in the URL hash (#/module-id/lesson-id), so lessons
-// can be bookmarked and shared and the browser back button works. Hash routing
-// needs no server config, which keeps GitHub Pages happy.
-function keyFromHash() {
-  const key = decodeURIComponent(window.location.hash.replace(/^#\/?/, ""));
-  return indexByKey.has(key) ? key : null;
+function currentRoute(initialPath) {
+  if (!isBrowser) return routeFromLocation(initialPath || "/", "", isKnown) ?? HOME;
+  return routeFromLocation(window.location.pathname, window.location.hash, isKnown);
 }
-
-const hashFor = (key) => `#/${key}`;
 
 function onlyKnownKeys(obj) {
-  return Object.fromEntries(
-    Object.entries(obj || {}).filter(([k]) => indexByKey.has(k)),
-  );
+  return Object.fromEntries(Object.entries(obj || {}).filter(([k]) => isKnown(k)));
 }
 
-export function useCourseState() {
+// `initialPath` is only used when rendering on the server (pre-rendering).
+export function useCourseState(initialPath) {
   const [saved] = useState(() => readJSON(KEYS.state, {}));
   const [done, setDone] = useState(() => onlyKnownKeys(saved.done));
   const [codes, setCodes] = useState(() => saved.codes || {});
-  const [current, setCurrent] = useState(
-    () =>
-      keyFromHash() || (indexByKey.has(saved.current) ? saved.current : FIRST_KEY),
-  );
+  const [route] = useState(() => currentRoute(initialPath));
+  const [view, setView] = useState(() => (route && route !== HOME ? "lesson" : "home"));
+  const [current, setCurrent] = useState(() => {
+    if (route && route !== HOME) return route;
+    return isKnown(saved.current) ? saved.current : FIRST_KEY;
+  });
+
+  // Normalise the URL once (legacy #/ links, unknown paths), then follow
+  // the browser's back/forward buttons.
   useEffect(() => {
-    if (window.location.hash !== hashFor(current)) {
-      window.history.replaceState(null, "", hashFor(current));
+    const target = view === "lesson" ? pathFor(current) : pathFor(HOME);
+    if (window.location.pathname !== target || window.location.hash) {
+      window.history.replaceState(null, "", target);
     }
-    const onHashChange = () => {
-      const key = keyFromHash();
-      if (key) setCurrent(key);
-      else window.history.replaceState(null, "", hashFor(current));
+    const onPop = () => {
+      const r = routeFromLocation(window.location.pathname, window.location.hash, isKnown);
+      if (r && r !== HOME) {
+        setCurrent(r);
+        setView("lesson");
+      } else {
+        setView("home");
+      }
     };
-    window.addEventListener("hashchange", onHashChange);
-    return () => window.removeEventListener("hashchange", onHashChange);
-  }, [current]);
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+    // Runs once: later navigation goes through goTo/goHome/popstate.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     writeJSON(KEYS.state, { current, done, codes });
   }, [current, done, codes]);
 
   const goTo = useCallback((key) => {
-    if (!indexByKey.has(key)) return;
-    if (window.location.hash !== hashFor(key)) window.location.hash = hashFor(key);
+    if (!isKnown(key)) return;
+    if (window.location.pathname !== pathFor(key)) window.history.pushState(null, "", pathFor(key));
     setCurrent(key);
+    setView("lesson");
+  }, []);
+
+  const goHome = useCallback(() => {
+    if (window.location.pathname !== pathFor(HOME)) window.history.pushState(null, "", pathFor(HOME));
+    setView("home");
   }, []);
 
   const index = indexByKey.get(current);
@@ -87,6 +102,7 @@ export function useCourseState() {
   }, [goTo]);
 
   return {
+    view,
     current,
     entry,
     mod: entry.mod,
@@ -99,6 +115,7 @@ export function useCourseState() {
     totalLessons: lessonList.length,
     code: codes[current] || "",
     goTo,
+    goHome,
     nav,
     markComplete,
     updateCode,

@@ -3,8 +3,8 @@ import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig({
-  // Relative base so the build works on GitHub Pages under any repo name.
-  base: "./",
+  // GitHub Pages serves the site from /<repo>/; CI sets BASE_PATH accordingly.
+  base: process.env.BASE_PATH || "/",
   plugins: [react(), tailwindcss()],
   worker: { format: "es" },
   test: {

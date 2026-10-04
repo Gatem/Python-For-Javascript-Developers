@@ -2,7 +2,8 @@
 // index.html runs the same logic inline before first paint to avoid a flash.
 export const THEME_KEY = "py4js-theme";
 
-const media = () => window.matchMedia?.("(prefers-color-scheme: dark)");
+const media = () =>
+  typeof window !== "undefined" ? window.matchMedia?.("(prefers-color-scheme: dark)") : null;
 
 export function getStoredTheme() {
   try {

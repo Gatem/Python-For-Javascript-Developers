@@ -7,6 +7,7 @@ export const KEYS = {
   notes: "py4js-notes-v3",
   activity: "py4js-activity",
   quoteHintSeen: "py4js-quote-learned",
+  tourSeen: "py4js-tour-seen",
 };
 
 export function readJSON(key, fallback = null) {

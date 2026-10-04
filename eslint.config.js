@@ -32,6 +32,14 @@ export default [
     languageOptions: { globals: { ...globals.node } },
   },
   {
+    files: ["src/entry-server.jsx"],
+    rules: { "react-refresh/only-export-components": "off" },
+  },
+  {
+    files: ["scripts/**"],
+    languageOptions: { globals: { ...globals.node } },
+  },
+  {
     files: ["src/workers/**"],
     languageOptions: { globals: { ...globals.worker } },
   },

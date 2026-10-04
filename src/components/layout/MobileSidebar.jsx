@@ -21,11 +21,11 @@ export default function MobileSidebar({ isOpen, onClose, ...navProps }) {
   if (!isOpen) return null;
   return (
     <>
-      <div aria-hidden="true" className="fixed inset-0 top-16 z-30 bg-black/40 backdrop-blur-[2px]" onClick={onClose} />
+      <div aria-hidden="true" className="fixed inset-0 top-16 z-30 md:hidden bg-black/40 backdrop-blur-[2px]" onClick={onClose} />
       <div
         id="mobile-lesson-menu"
         ref={panelRef}
-        className="fixed bottom-0 left-0 top-16 z-30 w-[86vw] max-w-[340px] overflow-y-auto scroll-thin border-r border-fg/10 bg-bg shadow-card"
+        className="fixed bottom-0 left-0 top-16 z-30 w-[86vw] md:hidden max-w-[340px] overflow-y-auto scroll-thin border-r border-fg/10 bg-bg shadow-card"
       >
         <SideNav {...navProps} />
       </div>

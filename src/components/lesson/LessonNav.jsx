@@ -1,14 +1,11 @@
 import { ArrowLeft, ArrowRight } from "lucide-react";
+import { linkProps } from "../../lib/routes";
 
-function NavCard({ entry, direction, onClick }) {
+function NavCard({ entry, direction, onGo }) {
   const isNext = direction === "next";
   return (
     <a
-      href={`#/${entry.key}`}
-      onClick={(e) => {
-        e.preventDefault();
-        onClick();
-      }}
+      {...linkProps(entry.key, onGo)}
       className={`group flex min-w-0 items-center gap-3 rounded-2xl border border-fg/10 bg-surface p-4 no-underline shadow-card transition-all hover:-translate-y-0.5 hover:border-accent/40 ${
         isNext ? "justify-end text-right" : ""
       }`}
@@ -30,11 +27,11 @@ function NavCard({ entry, direction, onClick }) {
   );
 }
 
-export default function LessonNav({ prev, next, onPrev, onNext }) {
+export default function LessonNav({ prev, next, onGo }) {
   return (
     <nav aria-label="Lesson navigation" className="grid gap-3 border-t border-fg/8 pt-8 sm:grid-cols-2">
-      <div className="min-w-0">{prev && <NavCard entry={prev} direction="prev" onClick={onPrev} />}</div>
-      <div className="min-w-0">{next && <NavCard entry={next} direction="next" onClick={onNext} />}</div>
+      <div className="min-w-0">{prev && <NavCard entry={prev} direction="prev" onGo={onGo} />}</div>
+      <div className="min-w-0">{next && <NavCard entry={next} direction="next" onGo={onGo} />}</div>
     </nav>
   );
 }

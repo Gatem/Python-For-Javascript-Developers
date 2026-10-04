@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { courseModules, lessonList } from "./data";
 import { useCourseState } from "./hooks/useCourseState";
 import { useResponsive } from "./hooks/useResponsive";
@@ -13,11 +13,17 @@ import LessonView from "./components/lesson/LessonView";
 import NotesPanel from "./components/notes/NotesPanel";
 import QuotePopover from "./components/notes/QuotePopover";
 import CelebrationDialog from "./components/celebration/CelebrationDialog";
+import LandingPage from "./components/landing/LandingPage";
+import OnboardingTour from "./components/onboarding/OnboardingTour";
+import { KEYS, readFlag, writeFlag } from "./lib/storage";
 
-export default function App() {
-  const course = useCourseState();
+const isBrowser = typeof window !== "undefined";
+
+// `initialPath` is only passed when pre-rendering pages at build time.
+export default function App({ initialPath } = {}) {
+  const course = useCourseState(initialPath);
   const { theme, toggleTheme } = useTheme();
-  const { isMobile, isWide, menuOpen, toggleMenu, closeMenu } = useResponsive();
+  const { isWide, menuOpen, toggleMenu, closeMenu } = useResponsive();
   const { activity, celebration, recordCompletion, dismissCelebration } = useActivity();
   const { markComplete, done } = course;
 
@@ -35,8 +41,21 @@ export default function App() {
   const { entries, addNote, addQuote, updateEntry, deleteEntry, saved, totalNoteCount, quotes } =
     useNotes(course.current);
 
-  const [notesOpen, setNotesOpen] = useState(() => window.innerWidth >= 1280);
+  // null = automatic (open on wide screens, decided by CSS so the pre-rendered
+  // HTML matches every screen size); true/false once the learner toggles it.
+  const [notesOpen, setNotesOpen] = useState(null);
   const [focusEntryId, setFocusEntryId] = useState(null);
+  const [tourOpen, setTourOpen] = useState(() => isBrowser && !readFlag(KEYS.tourSeen));
+
+  // Landing <-> lessons: always start at the top of the new page.
+  useEffect(() => {
+    window.scrollTo({ top: 0 });
+  }, [course.view]);
+
+  const closeTour = useCallback(() => {
+    writeFlag(KEYS.tourSeen);
+    setTourOpen(false);
+  }, []);
 
   const handleSelect = (key) => {
     course.goTo(key);
@@ -58,6 +77,19 @@ export default function App() {
     onReset: handleReset,
   };
 
+  if (course.view === "home") {
+    return (
+      <LandingPage
+        theme={theme}
+        onToggleTheme={toggleTheme}
+        onStart={course.goTo}
+        currentEntry={course.entry}
+        completedCount={course.completedCount}
+        done={course.done}
+      />
+    );
+  }
+
   return (
     <div className="min-h-screen font-sans text-text">
       <a
@@ -74,18 +106,16 @@ export default function App() {
         activity={activity}
         theme={theme}
         onToggleTheme={toggleTheme}
-        isMobile={isMobile}
         menuOpen={menuOpen}
         onMenu={toggleMenu}
+        onHome={course.goHome}
+        onShowTour={() => setTourOpen(true)}
         completedCount={course.completedCount}
         totalLessons={course.totalLessons}
       />
       <div className="flex w-full">
-        {isMobile ? (
-          <MobileSidebar isOpen={menuOpen} onClose={closeMenu} {...navProps} />
-        ) : (
-          <Sidebar {...navProps} />
-        )}
+        <Sidebar {...navProps} />
+        <MobileSidebar isOpen={menuOpen} onClose={closeMenu} {...navProps} />
         <LessonView
           mod={course.mod}
           lesson={course.lesson}
@@ -93,8 +123,8 @@ export default function App() {
           prev={lessonList[course.index - 1]}
           next={lessonList[course.index + 1]}
           isDone={!!course.done[course.current]}
-          onPrev={() => course.nav(-1)}
           onNext={() => course.nav(1)}
+          onGo={course.goTo}
           code={course.code}
           onCodeChange={course.updateCode}
           exercise={exercise}
@@ -113,7 +143,7 @@ export default function App() {
           totalNoteCount={totalNoteCount}
           isOpen={notesOpen}
           isWide={isWide}
-          onToggle={() => setNotesOpen((p) => !p)}
+          onToggle={() => setNotesOpen((p) => (p === null ? !isWide : !p))}
           focusEntryId={focusEntryId}
           onClearFocus={() => setFocusEntryId(null)}
         />
@@ -125,6 +155,7 @@ export default function App() {
           }}
         />
       </div>
+      {tourOpen && <OnboardingTour onClose={closeTour} />}
       <CelebrationDialog
         celebration={celebration}
         activity={activity}

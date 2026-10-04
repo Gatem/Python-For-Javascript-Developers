@@ -21,8 +21,8 @@ export default function LessonView({
   prev,
   next,
   isDone,
-  onPrev,
   onNext,
+  onGo,
   code,
   onCodeChange,
   exercise,
@@ -67,12 +67,12 @@ export default function LessonView({
               Lesson {index + 1} of {mod.lessons.length}
             </span>
           </p>
-          <h2
+          <h1
             id="lesson-title"
             className="m-0 text-[30px] font-semibold leading-tight tracking-[-0.02em] text-text sm:text-[38px]"
           >
             {lesson.title}
-          </h2>
+          </h1>
           <div className="mt-4 flex flex-wrap items-center gap-2 text-[13px] text-muted">
             <span className="inline-flex items-center gap-1.5">
               <Clock aria-hidden="true" size={14} />
@@ -101,7 +101,7 @@ export default function LessonView({
             hasNext={!!next}
             isDone={isDone}
           />
-          <LessonNav prev={prev} next={next} onPrev={onPrev} onNext={onNext} />
+          <LessonNav prev={prev} next={next} onGo={onGo} />
         </div>
         <Footer />
       </article>

@@ -24,7 +24,7 @@ export default function ExercisePanel({ exercise, state, code, onCodeChange, onN
       <div aria-hidden="true" className="absolute inset-x-0 top-0 h-1 bg-linear-to-r from-emerald-400 via-teal-400 to-blue-500" />
       <div className="p-5 sm:p-7">
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-          <h3 id="exercise-heading" className="m-0 flex items-center gap-2.5 text-[19px] font-semibold text-text">
+          <h2 id="exercise-heading" className="m-0 flex items-center gap-2.5 text-[19px] font-semibold text-text">
             <span className="flex size-9 items-center justify-center rounded-xl bg-accent/12 text-accent-text">
               <Dumbbell aria-hidden="true" size={18} />
             </span>
@@ -34,7 +34,7 @@ export default function ExercisePanel({ exercise, state, code, onCodeChange, onN
                 <CircleCheck aria-hidden="true" size={13} /> Completed
               </span>
             )}
-          </h3>
+          </h2>
           <span className="inline-flex items-center gap-1.5 text-[12px] text-muted">
             <Cpu aria-hidden="true" size={13} />
             Real Python, running in your browser

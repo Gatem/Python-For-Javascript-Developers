@@ -18,7 +18,8 @@ export default function NotesPanel({
 }) {
   const listRef = useRef(null);
   const prevLength = useRef(entries.length);
-  const isOverlay = isOpen && !isWide;
+  const auto = isOpen === null;
+  const isOverlay = isOpen === true && !isWide;
 
   useEffect(() => {
     if (!isOverlay) return;
@@ -34,27 +35,25 @@ export default function NotesPanel({
     prevLength.current = entries.length;
   }, [entries.length]);
 
-  if (!isOpen) {
-    return (
-      <button
-        type="button"
-        onClick={onToggle}
-        aria-label={totalNoteCount ? `Open notes (${totalNoteCount} saved)` : "Open notes"}
-        title="Notes"
-        className="fixed bottom-5 right-5 z-30 flex size-13 items-center justify-center rounded-2xl bg-text text-bg shadow-[0_10px_30px_-8px_rgba(0,0,0,0.45)] transition-transform hover:-translate-y-0.5 cursor-pointer"
-      >
-        <NotebookPen aria-hidden="true" size={21} />
-        {totalNoteCount > 0 && (
-          <span
-            aria-hidden="true"
-            className="absolute -right-1.5 -top-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-info px-1 text-[11px] font-semibold text-white ring-2 ring-bg"
-          >
-            {totalNoteCount > 9 ? "9+" : totalNoteCount}
-          </span>
-        )}
-      </button>
-    );
-  }
+  const fab = (extraClass = "") => (
+    <button
+      type="button"
+      onClick={onToggle}
+      aria-label={totalNoteCount ? `Open notes (${totalNoteCount} saved)` : "Open notes"}
+      title="Notes"
+      className={`fixed bottom-5 right-5 z-30 flex size-13 items-center justify-center rounded-2xl bg-text text-bg shadow-[0_10px_30px_-8px_rgba(0,0,0,0.45)] transition-transform hover:-translate-y-0.5 cursor-pointer ${extraClass}`}
+    >
+      <NotebookPen aria-hidden="true" size={21} />
+      {totalNoteCount > 0 && (
+        <span
+          aria-hidden="true"
+          className="absolute -right-1.5 -top-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-info px-1 text-[11px] font-semibold text-white ring-2 ring-bg"
+        >
+          {totalNoteCount > 9 ? "9+" : totalNoteCount}
+        </span>
+      )}
+    </button>
+  );
 
   const panelContent = (
     <>
@@ -129,16 +128,29 @@ export default function NotesPanel({
     </>
   );
 
-  if (isWide) {
+  const inlinePanel = (extraClass = "") => (
+    <aside
+      aria-labelledby="notes-heading"
+      className={`sticky top-16 h-[calc(100dvh-4rem)] w-[340px] shrink-0 flex-col self-start border-l border-fg/8 bg-surface-2/40 ${extraClass}`}
+    >
+      {panelContent}
+    </aside>
+  );
+
+  // Automatic: panel on wide screens, button elsewhere, decided purely by CSS
+  // so the pre-rendered page never shifts after JavaScript loads.
+  if (auto) {
     return (
-      <aside
-        aria-labelledby="notes-heading"
-        className="sticky top-16 flex h-[calc(100dvh-4rem)] w-[340px] shrink-0 flex-col self-start border-l border-fg/8 bg-surface-2/40"
-      >
-        {panelContent}
-      </aside>
+      <>
+        {inlinePanel("hidden xl:flex")}
+        {fab("xl:hidden")}
+      </>
     );
   }
+
+  if (!isOpen) return fab();
+
+  if (isWide) return inlinePanel("flex");
 
   return (
     <>
